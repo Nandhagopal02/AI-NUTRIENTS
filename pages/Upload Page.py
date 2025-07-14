@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 import pandas as pd
 import openai
+import httpx
 import pytz
 
 st.set_page_config(page_title="🍱 Food Identifier & Calorie Tracker", layout="wide")
@@ -18,12 +19,12 @@ if uploaded_file:
     # Show uploaded image
     image_bytes = uploaded_file.read()
     base64_image = base64.b64encode(image_bytes).decode("utf-8")
-    col1.image(image_bytes, caption="Uploaded Image", use_container_width=True)
+    col1.image(image_bytes, caption="Uploaded Image")  # Removed use_container_width
 
-    # Send to AI
+    # Send to AI — updated OpenAI client with http_client
     client = openai.OpenAI(
-        api_key="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",  # Replace with your actual key
-        base_url="https://openrouter.ai/api/v1"
+        api_key="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",  # 🔐 Replace with your OpenRouter key
+        http_client=httpx.Client(base_url="https://openrouter.ai/api/v1")
     )
 
     with col2:
@@ -105,5 +106,5 @@ st.markdown("---")
 st.subheader("📋 Last 5 Uploaded Meals")
 conn = sqlite3.connect("nutrition_log.db")
 df = pd.read_sql("SELECT * FROM food_nutrition ORDER BY id DESC LIMIT 5", conn)
-st.dataframe(df.drop(columns=["raw_llm_response"]), use_container_width=True)
+st.dataframe(df.drop(columns=["raw_llm_response"]))
 conn.close()
