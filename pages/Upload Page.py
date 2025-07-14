@@ -22,7 +22,7 @@ if uploaded_file:
 
     # Send to AI
     client = openai.OpenAI(
-        api_key="sk-or-xxx",  # Replace with your actual key
+        api_key="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",  # Replace with your actual key
         base_url="https://openrouter.ai/api/v1"
     )
 
