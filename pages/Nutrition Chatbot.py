@@ -1,44 +1,42 @@
 import streamlit as st
 import openai
+import httpx
+import os
 
 # Page setup
 st.set_page_config(page_title="🤖 Nutrition Chatbot", layout="wide")
 st.title("🥦 AI Nutrition Chat Assistant")
 
-# OpenRouter API setup
+# Secure OpenRouter API setup
 client = openai.OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key="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"  # 🔁 Replace with your actual OpenRouter API key
+    api_key=os.getenv("OPENROUTER_KEY"),  # 🔐 Set this in Render → Environment Variables
+    http_client=httpx.Client(base_url="https://openrouter.ai/api/v1")
 )
 
-# Session state to hold messages
+# Initialize message history
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "system",
             "content": (
-                "You are a helpful nutrition assistant. Answer only questions related to food, "
-                "macronutrients (calories, protein, carbs, fat), vitamins, or health nutrition. "
-                "If a user asks something unrelated (e.g., weather, sports), say: "
-                "'❌ I'm a nutrition assistant. I can only help with food and nutrition topics.'"
+                "You are a helpful nutrition assistant. Respond only to questions about food, "
+                "calories, macronutrients, vitamins, or nutrition. If asked something unrelated, reply: "
+                "'❌ I'm a nutrition assistant. I only help with food and nutrition topics.'"
             )
         },
         {
             "role": "assistant",
             "content": (
-                "👋 Hello! I'm your personal AI Nutrition Assistant. Ask me anything about food, calories, protein, fat, carbs, or vitamins!"
+                "👋 Hello! I'm your AI Nutrition Assistant. Ask me about calories, protein, fat, carbs, or vitamins!"
             )
         }
     ]
 
-# Show conversation
+# Display previous messages
 for msg in st.session_state.messages:
-    if msg["role"] == "user":
-        st.chat_message("user").markdown(msg["content"])
-    elif msg["role"] == "assistant":
-        st.chat_message("assistant").markdown(msg["content"])
+    st.chat_message(msg["role"]).markdown(msg["content"])
 
-# Chat input box
+# Input box
 user_input = st.chat_input("Ask a nutrition question...")
 
 if user_input:
@@ -53,7 +51,7 @@ if user_input:
                     messages=st.session_state.messages,
                     max_tokens=500,
                     extra_headers={
-                        "HTTP-Referer": "https://your-app.com",
+                        "HTTP-Referer": "https://your-app.com",  # optional
                         "X-Title": "NutriBot"
                     }
                 )
